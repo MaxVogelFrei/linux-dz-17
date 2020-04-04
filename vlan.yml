@@ -102,7 +102,7 @@
       nmcli:
         type: vlan
         conn_name: vlan100
-        ip4: 10.10.10.254/24
+        ip4: 10.10.10.1/24
         vlanid: 100
         ifname: vlan100
         vlandev: eth1
@@ -137,7 +137,7 @@
       nmcli:
         type: vlan
         conn_name: vlan101
-        ip4: 10.10.10.254/24
+        ip4: 10.10.10.1/24
         vlanid: 101
         ifname: vlan101
         vlandev: eth1
@@ -172,7 +172,7 @@
       nmcli:
         type: vlan
         conn_name: vlan100
-        ip4: 10.10.10.1/24
+        ip4: 10.10.10.254/24
         vlanid: 100
         ifname: vlan100
         vlandev: eth1
@@ -207,7 +207,7 @@
       nmcli:
         type: vlan
         conn_name: vlan101
-        ip4: 10.10.10.1/24
+        ip4: 10.10.10.254/24
         vlanid: 101
         ifname: vlan101
         vlandev: eth1
