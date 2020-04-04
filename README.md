@@ -16,4 +16,49 @@ testClient2 <-> testServer2
 между centralRouter и inetRouter
 "пробросить" 2 линка (общая inernal сеть) и объединить их в бонд
 
- 
+## TEAMING
+
+[ansible](teaming.yml)
+
+Машины inetRouter centralRouter настраиваются ансиблом с помощью темплейтов с настройками интерфейсов
+
+```bash
+DEVICE=team0
+IPADDR={{ item.ip }}
+NETMASK=255.255.255.252
+ONBOOT=yes
+NM_CONTROLLED=no
+USERCTL=no
+BOOTPROTO=none
+DEVICETYPE="Team"
+TEAM_CONFIG='{ "runner" : { "name" : "activebackup", "hwaddr_policy" : "by_active" }, "link_watch": { "name" : "ethtool" } }'
+```
+
+в результате получаю устойчивую к отключению одного из физических интерфейсов связь(отключать нужно с обоих сторон одновременно)
+
+## VLAN
+
+[ansible](vlan.yml)
+
+VLAN на всех машинах настраиваются через модуль ансибла nmcli
+
+```yaml
+    - name: config VLAN
+      nmcli: 
+        type: vlan
+        conn_name: "{{ item.conn_name }}"
+        ip4: "{{ item.ip4 }}"
+        vlanid: "{{ item.vlanid }}"
+        ifname: "{{ item.ifname }}"
+        vlandev: "{{ item.vlandev }}"
+        autoconnect: yes
+        state: present
+      with_items:
+          - { conn_name: "vlan100", ip4: "10.10.10.100/24", vlanid: "100", ifname: "vlan100", vlandev: "eth2" }
+          - { conn_name: "vlan101", ip4: "10.10.10.101/24", vlanid: "101", ifname: "vlan101", vlandev: "eth2" }
+
+```
+
+Таким образом получаются две изолированные подсети в одном физическом интерфейсе
+
+
