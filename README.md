@@ -19,7 +19,7 @@ testClient2 <-> testServer2
 
 ## TEAMING
 
-[ansible](teaming.yml)
+[ansible-playbook teaming.yml](teaming.yml)
 
 Машины inetRouter centralRouter настраиваются ансиблом с помощью темплейтов с настройками интерфейсов
 
@@ -39,7 +39,7 @@ TEAM_CONFIG='{ "runner" : { "name" : "activebackup", "hwaddr_policy" : "by_activ
 
 ## VLAN
 
-[ansible](vlan.yml)
+[ansible-playbook vlan.yml](vlan.yml)
 
 VLAN на всех машинах настраиваются через модуль ансибла nmcli
 
