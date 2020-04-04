@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+DEVICE=team0
+IPADDR={{ item.ip }}
+NETMASK=255.255.255.252
+ONBOOT=yes
+NM_CONTROLLED=no
+USERCTL=no
+BOOTPROTO=none
+DEVICETYPE="Team"
+TEAM_CONFIG='{ "runner" : { "name" : "activebackup", "hwaddr_policy" : "by_active" }, "link_watch": { "name" : "ethtool" } }'

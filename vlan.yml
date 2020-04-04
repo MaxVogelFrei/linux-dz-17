@@ -1,0 +1,217 @@
+---
+- hosts: Office1Router
+  become: true
+  tasks:
+    - name: enable forward
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    - name: no zeroconf
+      lineinfile:
+        path: /etc/sysconfig/network
+        line: "NOZEROCONF=yes"
+        state: present
+
+    - name: Install nmcli
+      yum:
+        name:
+          - NetworkManager-glib
+          - nm-connection-editor
+          - libsemanage-python
+          - policycoreutils-python
+        state: present
+
+    - name: eth1 config
+      template:
+        src: templates/Office1-eth1.j2
+        dest: "/etc/sysconfig/network-scripts/ifcfg-eth1"
+        owner: root
+        group: root
+        mode: 0644
+      with_items:
+        - { ip: 192.168.255.6 }
+
+    - name: no defroute
+      lineinfile:
+        path: /etc/sysconfig/network-scripts/ifcfg-eth0
+        line: 'DEFROUTE="NO"'
+        state: present
+
+    - name: route to central
+      template:
+        src: templates/Office1-route-eth1.j2
+        dest: "/etc/sysconfig/network-scripts/route-eth1"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: config VLAN
+      nmcli: 
+        type: vlan
+        conn_name: "{{ item.conn_name }}"
+        ip4: "{{ item.ip4 }}"
+        vlanid: "{{ item.vlanid }}"
+        ifname: "{{ item.ifname }}"
+        vlandev: "{{ item.vlandev }}"
+        autoconnect: yes
+        state: present
+      with_items:
+          - { conn_name: "vlan100", ip4: "10.10.10.100/24", vlanid: "100", ifname: "vlan100", vlandev: "eth2" }
+          - { conn_name: "vlan101", ip4: "10.10.10.101/24", vlanid: "101", ifname: "vlan101", vlandev: "eth2" }
+
+    - name: Restart NM
+      systemd:
+        name: NetworkManager
+        state: restarted
+
+    - name: Restart network
+      systemd:
+        name: network
+        state: restarted
+
+
+- hosts: testServer1
+  become: true
+  tasks:
+    - name: no zeroconf
+      lineinfile:
+        path: /etc/sysconfig/network
+        line: "NOZEROCONF=yes"
+        state: present
+
+    - name: Install nmcli
+      yum:
+        name:
+          - NetworkManager-glib
+          - nm-connection-editor
+          - libsemanage-python
+          - policycoreutils-python
+        state: present
+
+    - name: no defroute
+      lineinfile:
+        path: /etc/sysconfig/network-scripts/ifcfg-eth0
+        line: 'DEFROUTE="NO"'
+        state: present
+
+    - name: config VLAN
+      nmcli:
+        type: vlan
+        conn_name: vlan100
+        ip4: 10.10.10.254/24
+        vlanid: 100
+        ifname: vlan100
+        vlandev: eth1
+        autoconnect: yes
+        state: present
+
+- hosts: testServer2
+  become: true
+  tasks:
+    - name: no zeroconf
+      lineinfile:
+        path: /etc/sysconfig/network
+        line: "NOZEROCONF=yes"
+        state: present
+
+    - name: Install nmcli
+      yum:
+        name:
+          - NetworkManager-glib
+          - nm-connection-editor
+          - libsemanage-python
+          - policycoreutils-python
+        state: present
+
+    - name: no defroute
+      lineinfile:
+        path: /etc/sysconfig/network-scripts/ifcfg-eth0
+        line: 'DEFROUTE="NO"'
+        state: present
+
+    - name: config VLAN
+      nmcli:
+        type: vlan
+        conn_name: vlan101
+        ip4: 10.10.10.254/24
+        vlanid: 101
+        ifname: vlan101
+        vlandev: eth1
+        autoconnect: yes
+        state: present
+
+- hosts: testClient1
+  become: true
+  tasks:
+    - name: no zeroconf
+      lineinfile:
+        path: /etc/sysconfig/network
+        line: "NOZEROCONF=yes"
+        state: present
+
+    - name: Install nmcli
+      yum:
+        name:
+          - NetworkManager-glib
+          - nm-connection-editor
+          - libsemanage-python
+          - policycoreutils-python
+        state: present
+
+    - name: no defroute
+      lineinfile:
+        path: /etc/sysconfig/network-scripts/ifcfg-eth0
+        line: 'DEFROUTE="NO"'
+        state: present
+
+    - name: config VLAN
+      nmcli:
+        type: vlan
+        conn_name: vlan100
+        ip4: 10.10.10.1/24
+        vlanid: 100
+        ifname: vlan100
+        vlandev: eth1
+        autoconnect: yes
+        state: present
+
+- hosts: testClient2
+  become: true
+  tasks:
+    - name: no zeroconf
+      lineinfile:
+        path: /etc/sysconfig/network
+        line: "NOZEROCONF=yes"
+        state: present
+
+    - name: Install nmcli
+      yum:
+        name:
+          - NetworkManager-glib
+          - nm-connection-editor
+          - libsemanage-python
+          - policycoreutils-python
+        state: present
+
+    - name: no defroute
+      lineinfile:
+        path: /etc/sysconfig/network-scripts/ifcfg-eth0
+        line: 'DEFROUTE="NO"'
+        state: present
+
+    - name: config VLAN
+      nmcli:
+        type: vlan
+        conn_name: vlan101
+        ip4: 10.10.10.1/24
+        vlanid: 101
+        ifname: vlan101
+        vlandev: eth1
+        autoconnect: yes
+        state: present
+
+

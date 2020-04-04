@@ -1,0 +1,149 @@
+---
+- hosts: inetRouter
+  become: true
+  tasks:
+    - name: enable forward
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    - name: no ZeroConf
+      lineinfile:
+        path: /etc/sysconfig/network
+        line: "NOZEROCONF=yes"
+        state: present
+
+    - name: iptables add masquerade
+      iptables:
+        table: nat
+        chain: POSTROUTING
+        out_interface: eth0
+        destination: "!192.168.0.0/16"
+        jump: MASQUERADE
+
+    - name: save rules
+      shell: "iptables-save > /etc/sysconfig/iptables"
+
+    - name: team config
+      template:
+        src: templates/inet-team0.j2
+        dest: "/etc/sysconfig/network-scripts/ifcfg-team0"
+        owner: root
+        group: root
+        mode: 0644
+      with_items:
+        - { ip: 192.168.255.1 }
+
+    - name: eth1 config
+      template:
+        src: templates/inet-eth1.j2
+        dest: "/etc/sysconfig/network-scripts/ifcfg-eth1"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: eth2 config
+      template:
+        src: templates/inet-eth2.j2
+        dest: "/etc/sysconfig/network-scripts/ifcfg-eth2"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: team0 route
+      template:
+        src: templates/inet-route-team0.j2
+        dest: "/etc/sysconfig/network-scripts/route-team0"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Restart network
+      systemd:
+        name: network
+        state: restarted
+
+
+- hosts: centralRouter
+  become: true
+  tasks:
+    - name: enable forward
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    - name: no zeroconf
+      lineinfile:
+        path: /etc/sysconfig/network
+        line: "NOZEROCONF=yes"
+        state: present
+
+    - name: team config
+      template:
+        src: templates/central-team0.j2
+        dest: "/etc/sysconfig/network-scripts/ifcfg-team0"
+        owner: root
+        group: root
+        mode: 0644
+      with_items:
+        - { ip: 192.168.255.2 }
+
+    - name: eth1 config
+      template:
+        src: templates/central-eth1.j2
+        dest: "/etc/sysconfig/network-scripts/ifcfg-eth1"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: eth2 config
+      template:
+        src: templates/central-eth2.j2
+        dest: "/etc/sysconfig/network-scripts/ifcfg-eth2"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: eth3 config
+      template:
+        src: templates/central-eth3.j2
+        dest: "/etc/sysconfig/network-scripts/ifcfg-eth2"
+        owner: root
+        group: root
+        mode: 0644
+      with_items:
+        - { ip: 192.168.255.5 }
+
+     - name: no defroute
+      lineinfile:
+        path: /etc/sysconfig/network-scripts/ifcfg-eth0
+        line: 'DEFROUTE="NO"'
+        state: present
+
+    - name: route to team0
+      template:
+        src: templates/central-route-team0.j2
+        dest: "/etc/sysconfig/network-scripts/route-team0"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: route to office1
+      template:
+        src: templates/central-route-eth3.j2
+        dest: "/etc/sysconfig/network-scripts/route-eth3"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Restart network
+      systemd:
+        name: network
+        state: restarted
+
