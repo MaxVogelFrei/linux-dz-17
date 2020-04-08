@@ -120,7 +120,7 @@
       with_items:
         - { ip: 192.168.255.5 }
 
-     - name: no defroute
+    - name: no defroute
       lineinfile:
         path: /etc/sysconfig/network-scripts/ifcfg-eth0
         line: 'DEFROUTE="NO"'

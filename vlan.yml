@@ -109,6 +109,13 @@
         autoconnect: yes
         state: present
 
+    - name: Restart network
+      systemd:
+        name: network
+        state: restarted
+
+
+
 - hosts: testServer2
   become: true
   tasks:
@@ -143,6 +150,13 @@
         vlandev: eth1
         autoconnect: yes
         state: present
+
+    - name: Restart network
+      systemd:
+        name: network
+        state: restarted
+
+
 
 - hosts: testClient1
   become: true
@@ -179,6 +193,13 @@
         autoconnect: yes
         state: present
 
+    - name: Restart network
+      systemd:
+        name: network
+        state: restarted
+
+
+
 - hosts: testClient2
   become: true
   tasks:
@@ -213,5 +234,10 @@
         vlandev: eth1
         autoconnect: yes
         state: present
+
+    - name: Restart network
+      systemd:
+        name: network
+        state: restarted
 
 
