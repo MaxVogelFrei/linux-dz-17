@@ -17,6 +17,15 @@ testClient2 <-> testServer2
 между centralRouter и inetRouter  
 "пробросить" 2 линка (общая inernal сеть) и объединить их в бонд  
 
+## Настройка стенда
+
+Настройка стенда выполняется машиной provision  
+[ansible-playbook teaming.yml](teaming.yml)  
+[ansible-playbook vlan.yml](vlan.yml)
+
+для доступа к другим машинам необходим доступ на адресе хоста 192.168.17.1  
+к TCP портам: 20022, 21022, 22022, 23022, 24022, 25022, 26022
+
 ## TEAMING
 
 [ansible-playbook teaming.yml](teaming.yml)

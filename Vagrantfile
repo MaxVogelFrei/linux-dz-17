@@ -89,9 +89,11 @@ Vagrant.configure("2") do |config|
             case boxname.to_s
             when "provision"
               box.vm.provision "shell", run: "always", inline: <<-SHELL
+                yum install epel-release -y
                 yum install ansible -y
-                cp /vagrant/* /root/
-		ansible-playbook teaming.yml
+                cp -r /vagrant/* /root/
+                cd /root
+                ansible-playbook teaming.yml
                 ansible-playbook vlan.yml
                 SHELL
             end
